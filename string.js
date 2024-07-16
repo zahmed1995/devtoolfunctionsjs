@@ -8,17 +8,44 @@ const numSysInputSelection = document.getElementById('numSysInputSelection');
 const numSysOutputSelcetion = document.getElementById('numSysOutputSelection');
 
 // input string conversion
-function convertStringInput(input, outputOp) {
-    switch(outputOp)
-    {
-        case 'decimal': return input.charCodeAt(0); break;
-        case 'octal':  return input.charCodeAt(0).toString(8); break;
-        case 'hex': return input.charCodeAt(0).toString(16); break;
-        case 'binary': return input.charCodeAt(0).toString(2); break;
-        default:
-            return 'Invalid output option.';
-            break;
-    }
+function convertStringData(input) {
+  // Helper functions to convert number to different bases
+  function toBinary(num) {
+    return num.toString(2).padStart(8, '0');
+  }
+
+  function toOctal(num) {
+    return num.toString(8).padStart(3, '0');
+  }
+
+  function toDecimal(num) {
+    return num.toString(10);
+  }
+
+  function toHexadecimal(num) {
+    return num.toString(16).toUpperCase().padStart(2, '0');
+  }
+
+  let binary = '';
+  let octal = '';
+  let decimal = '';
+  let hexadecimal = '';
+
+  for(let char of input) {
+    let asciiCode = char.charCodeAt(0);
+
+    binary += toBinary(asciiCode) + ' ';
+    octal += toOctal(asciiCode) + ' ';
+    decimal += toDecimal(asciiCode) + ' ';
+    hexadecimal += toHexadecimal(asciiCode) + ' ';
+  }
+
+  return {
+    binary: binary.trim(),
+    octal: octal.trim(),
+    decimal: decimal.trim(),
+    hexadecimal: hexadecimal.trim(),
+  };
 }
 
 // Get the dropdown menu element
@@ -52,7 +79,18 @@ inputDropdownMenu.addEventListener('change', function(event) {
 // convert button event listener
 document.getElementById('convertNumberButton').addEventListener('click', () => {
     const outputOp = document.querySelector('#numSysOutputSelection').value;
-    numberOutput.value = convertStringInput(numberInput.value, outputOp);
+
+    // perform string conversion for all bases
+    const result = convertStringData(numberInput.value);
+
+    // return the chosen output number base
+    switch(outputOp) {
+      case 'binary': numberOutput.value = result.binary;  break;
+      case 'octal': numberOutput.value = result.octal;  break;
+      case 'decimal': numberOutput.value = result.decimal;  break;
+      case 'hex': numberOutput.value = result.hexadecimal;  break;
+      default:  numberOutput.value = "Invalid output type selected..."; break;
+    }
 });
 
 // clear input textbox 
