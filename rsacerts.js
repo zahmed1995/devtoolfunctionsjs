@@ -2,35 +2,72 @@
 const rsaPub = document.getElementById('rsaPubTextbox');
 // rsa private key textbox
 const rsaPriv = document.getElementById('rsaPrivTextbox');
+// rsa key pair length variable
+let rsaKeyLength = 1024;
 
 const crypto = require('crypto');
 
-// generate rsa key pair event listener
-document.getElementById('generateRsaKeyPair').addEventListener('click', () => {
-  // get key length  
-  const rsaKeyLength = document.querySelector('#rsaKeyLength').value;
-  // generate rsa key pair
-  crypto.generateKeyPair('rsa', {
-    modulusLength: rsaKeyLength,
-    publicKeyEncoding: {
-      type: 'pki',
-      format: 'pem'
-    },
-    privateKeyEncoding: {
-      type: 'pkcs8',
-      format: 'pem',
-      cipher: 'aes-256-cbc',
-      passphrase: 'y-secret-passphrase'
-    }
-  }, (err, publicKey, privateKey) => {
-    if (err) {
-      console.error(err);
-    } else {
-      rsaPub.value = publicKey
-      rsaPriv.value = privateKey;
-    }
-  });
+function ab2str(buf) {
+  return String.fromCharCode.apply(null, new Uint8Array(buf));
+}
 
+// export key 
+async function exportRsaKeyPair(key, type) {
+  // be default select 'pksc8' as private key format
+  let format = 'pkcs8';
+
+  // if type is 'public' then select 'spki' as public key format
+  if(type == 'PUBLIC KEY') {
+    format = 'spki';
+  }
+
+  const exported = await window.crypto.subtle.exportKey(format, key);
+  const exportedAsString = ab2str(exported);
+  const exportedAsBase64 = window.btoa(exportedAsString);
+  const pemExported = `-----BEGIN ${type}-----\n${exportedAsBase64}\n-----END ${type}-----\n`;
+
+  if(type == 'PRIVATE KEY') {
+    rsaPriv.value = pemExported;
+  } else {
+    if(type == 'PUBLIC KEY') {
+      rsaPub.value = pemExported;
+    }
+  }
+}
+
+// // generate rsa key pair event listener
+document.getElementById('generateRsaKeyPair').addEventListener('click', generateRsaKeyPair);
+
+async function generateRsaKeyPair() {
+  // generate key
+  const keyPair = await window.crypto.subtle.generateKey(
+    {
+      name: "RSA-OAEP",
+      modulusLength: rsaKeyLength, // in bits
+      publicExponent: new Uint8Array([1, 0, 1]), // or
+      hash: "SHA-256",
+    },
+    true,
+    ["encrypt", "decrypt"],
+  ); 
+
+  // export key
+  exportRsaKeyPair(keyPair.privateKey, 'PRIVATE KEY');
+  exportRsaKeyPair(keyPair.publicKey, 'PUBLIC KEY');
+};
+
+// rsa key pair length value drop down change event listener
+document.querySelector('#rsaKeyLength').addEventListener('change', () => {
+    // Get the selected value from the dropdown menu
+    const selectedValue = event.target.value;
+
+    switch(selectedValue) {
+      case '4096': rsaKeyLength = 4096; break;
+      case '3072': rsaKeyLength = 3072; break;
+      case '2048': rsaKeyLength = 2048; break;
+      case '1024':
+      default:     rsaKeyLength = 1024; break;  
+    }
 });
 
 // copy private key to clipboard
