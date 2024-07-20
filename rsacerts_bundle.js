@@ -28965,8 +28965,8 @@ document.querySelector('#rsaKeyLength').addEventListener('change', () => {
 
 // copy private key to clipboard
 document.getElementById('copyPrivKeyToClipboard').addEventListener('click', () => {
-if (navigator.clipboard && numberOutput.value != null) {
-    navigator.clipboard.writeText(numberOutput.value).then(() => {
+if (navigator.clipboard && rsaPriv.value != null) {
+    navigator.clipboard.writeText(rsaPriv.value).then(() => {
         console.log('Private key copied to clipboard');
         alert('Private key copied to clipboard');
     }).catch((error) => {
@@ -28979,8 +28979,8 @@ if (navigator.clipboard && numberOutput.value != null) {
 
 // copy public key to clipboard
 document.getElementById('copyPubKeyToClipboard').addEventListener('click', () => {
-    if (navigator.clipboard && numberOutput.value != null) {
-        navigator.clipboard.writeText(numberOutput.value).then(() => {
+    if (navigator.clipboard && rsaPub.value != null) {
+        navigator.clipboard.writeText(rsaPub.value).then(() => {
           console.log('Public key copied to clipboard');
           alert('Public key copied to clipboard');
         }).catch((error) => {
